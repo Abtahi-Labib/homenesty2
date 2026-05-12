@@ -1,0 +1,8 @@
+{
+  "name": "HomeNesty",
+  "description": "Modern house rental management system connecting landlords and tenants directly with search, verification, and map integration.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}
