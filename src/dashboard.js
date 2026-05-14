@@ -48,35 +48,36 @@ function renderListings(items) {
   listEl.innerHTML = '';
   
   if (items.length === 0) {
-    listEl.innerHTML = '<div class="text-center py-20 bg-white rounded-3xl border border-dashed border-stone-100 italic font-serif">No listings yet.</div>';
+    listEl.innerHTML = '<div class="text-center py-20 bg-white rounded-[2.5rem] border border-dashed border-slate-200 italic font-serif text-slate-400 shadow-sm">No property entries in your portfolio.</div>';
     return;
   }
 
   items.forEach(p => {
     const item = document.createElement('div');
-    item.className = "bg-white border border-stone-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center gap-6";
+    item.className = "bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center gap-8 group hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-500";
     
     item.innerHTML = `
-      <div class="w-full md:w-24 h-24 bg-stone-100 rounded-xl overflow-hidden flex-shrink-0">
-        <img src="${p.image_url || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800'}" class="w-full h-full object-cover">
+      <div class="w-full md:w-32 h-32 bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0 relative">
+        <img src="${p.image_url || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800'}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+        <div class="absolute inset-0 bg-primary-navy/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
-      <div class="flex-1">
-        <div class="flex items-center gap-2 mb-1">
-           <h3 class="text-lg font-serif text-stone-900">${p.title}</h3>
-           <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full ${p.status === 'approved' ? 'bg-green-50 text-green-700' : p.status === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
+      <div class="flex-1 text-center md:text-left">
+        <div class="flex flex-col md:flex-row md:items-center gap-3 mb-2 justify-center md:justify-start">
+           <h3 class="text-xl font-serif text-primary-navy font-medium">${p.title}</h3>
+           <span class="text-[9px] font-bold uppercase tracking-[0.2em] px-3 py-1 rounded-full w-fit mx-auto md:mx-0 ${p.status === 'approved' ? 'bg-green-50 text-green-700' : p.status === 'rejected' ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-500'}">${p.status}</span>
         </div>
-        <div class="text-xs text-stone-400 font-sans space-x-4">
-           <span>${p.location}</span>
-           <span>৳ ${p.rent.toLocaleString()}</span>
+        <div class="text-xs text-slate-400 font-sans flex flex-wrap justify-center md:justify-start gap-4">
+           <span class="flex items-center"><svg class="w-3 h-3 mr-1 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${p.location}</span>
+           <span class="text-primary-navy/70 font-medium tracking-wide">৳ ${p.rent.toLocaleString()}</span>
         </div>
       </div>
-      <div class="flex items-center gap-2 ml-auto">
+      <div class="flex items-center gap-4 ml-auto">
         ${currentUser.profile.role === 'admin' && p.status === 'pending' ? `
-          <button class="approve-btn p-2 bg-green-50 text-green-600 rounded-lg" data-id="${p.id}">Approve</button>
-          <button class="reject-btn p-2 bg-red-50 text-red-600 rounded-lg" data-id="${p.id}">Reject</button>
+          <button class="approve-btn p-3 bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm" data-id="${p.id}" title="Approve"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg></button>
+          <button class="reject-btn p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm" data-id="${p.id}" title="Reject"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="12"/></svg></button>
         ` : ''}
-        <a href="/property.html?id=${p.id}" class="p-2 bg-stone-50 text-stone-600 rounded-lg">View</a>
-        <button class="delete-btn p-2 text-stone-400 hover:text-red-600" data-id="${p.id}">Delete</button>
+        <a href="/property.html?id=${p.id}" class="p-3 bg-slate-50 text-slate-600 rounded-xl hover:bg-primary-navy hover:text-white transition-all shadow-sm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></a>
+        <button class="delete-btn p-3 text-slate-300 hover:text-red-600 transition-colors" data-id="${p.id}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
       </div>
     `;
     listEl.appendChild(item);

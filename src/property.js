@@ -33,52 +33,87 @@ function renderProperty(p) {
   loading.classList.add('hidden');
 
   const owner = p.profiles;
+  const categoryLabels = {
+    'family': 'Family Estate',
+    'student': 'Student Studio',
+    'bachelor': 'Professional Suite',
+    'hotel': 'Vacation & Hotel'
+  };
 
   details.innerHTML = `
     <div class="flex-1">
-      <div class="aspect-[16/10] bg-stone-100 rounded-3xl overflow-hidden shadow-2xl relative">
-        <img src="${p.image_url || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800'}" alt="${p.title}" class="w-full h-full object-cover">
+      <div class="aspect-[16/10] bg-slate-100 rounded-[3rem] overflow-hidden shadow-2xl relative group">
+        <img src="${p.image_url || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800'}" alt="${p.title}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
         <div class="absolute top-8 left-8">
-           <span class="bg-white/90 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest text-stone-900 border border-stone-100">${p.category}</span>
+           <span class="bg-white/90 backdrop-blur px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-primary-navy border border-slate-100 shadow-sm">${categoryLabels[p.category] || p.category}</span>
         </div>
       </div>
 
-      <div class="mt-12">
-        <h1 class="text-4xl md:text-5xl font-serif tracking-tight text-stone-900 mb-6">${p.title}</h1>
-        <div class="flex items-center text-stone-500 mb-10 pb-8 border-b border-stone-100">
-           <span class="text-lg font-sans">${p.location}</span>
+      <div class="mt-16">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-10 border-b border-slate-100">
+          <div>
+            <h1 class="text-5xl md:text-6xl font-serif tracking-tight text-primary-navy mb-4">${p.title}</h1>
+            <p class="text-xl font-sans text-slate-400 flex items-center">
+              <svg class="w-5 h-5 mr-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              ${p.location}
+            </p>
+          </div>
+          <div class="text-right">
+             <span class="block text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-2">Monthly Investment</span>
+             <span class="text-4xl font-serif text-primary-navy">৳ ${p.rent.toLocaleString()}</span>
+          </div>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-12">
-           <div class="p-6 bg-stone-50 rounded-2xl border border-stone-100 text-center">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400 block mb-2 font-sans">Rooms</span>
-              <span class="text-lg font-serif text-stone-900">${p.rooms}</span>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-16">
+           <div class="p-8 bg-slate-50 rounded-3xl border border-slate-100 text-center group hover:bg-primary-navy transition-all duration-500">
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 block mb-3 font-sans group-hover:text-white/50">Accommodations</span>
+              <span class="text-2xl font-serif text-primary-navy group-hover:text-white">${p.rooms} Rooms</span>
            </div>
-           <div class="p-6 bg-stone-50 rounded-2xl border border-stone-100 text-center">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400 block mb-2 font-sans">Rent</span>
-              <span class="text-lg font-serif text-stone-900">৳ ${p.rent.toLocaleString()}</span>
+           <div class="p-8 bg-slate-50 rounded-3xl border border-slate-100 text-center group hover:bg-primary-navy transition-all duration-500">
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 block mb-3 font-sans group-hover:text-white/50">Classification</span>
+              <span class="text-2xl font-serif text-primary-navy group-hover:text-white capitalize">${categoryLabels[p.category] || p.category}</span>
            </div>
         </div>
 
-        <p class="text-stone-500 font-sans leading-loose text-lg whitespace-pre-line">${p.description}</p>
+        <div class="prose prose-slate max-w-none">
+          <h3 class="text-2xl font-serif text-primary-navy mb-6">About this Sanctuary</h3>
+          <p class="text-slate-500 font-sans leading-[2] text-lg whitespace-pre-line font-light">${p.description}</p>
+        </div>
       </div>
     </div>
 
     <div class="w-full lg:w-[400px]">
-      <div class="sticky top-32 space-y-8">
-        <div class="bg-white border border-stone-100 p-8 rounded-3xl shadow-xl">
-           <div class="mb-8 pb-6 border-b border-stone-50">
-              <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-2 block font-sans">Monthly Rent</span>
-              <span class="text-4xl font-serif text-stone-900">৳ ${p.rent.toLocaleString()}</span>
+      <div class="sticky top-32 space-y-10">
+        <div class="bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl shadow-slate-200/50">
+           <div class="mb-10 pb-8 border-b border-slate-50">
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-3 block font-sans">Lease Premium</span>
+              <div class="flex items-baseline gap-2">
+                <span class="text-5xl font-serif text-primary-navy">৳ ${p.rent.toLocaleString()}</span>
+                <span class="text-sm text-slate-400 font-sans">/mo</span>
+              </div>
            </div>
-           <a href="${p.map_link || '#'}" target="_blank" class="w-full bg-stone-900 text-white py-5 rounded-2xl font-bold uppercase tracking-widest text-xs flex items-center justify-center">View on Map</a>
+           <a href="${p.map_link || '#'}" target="_blank" class="w-full btn-luxury py-5 flex items-center justify-center gap-3">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+             Locate on Map
+           </a>
         </div>
 
         ${owner ? `
-          <div class="bg-stone-900 p-8 rounded-3xl text-white">
-            <h4 class="text-xs font-bold uppercase tracking-widest text-stone-500 mb-6 font-sans">Landlord Details</h4>
-            <h5 class="text-xl font-serif">${owner.full_name}</h5>
-            <p class="text-sm mt-2 text-stone-400">${owner.phone}</p>
+          <div class="luxury-gradient p-10 rounded-[2.5rem] text-white shadow-xl">
+            <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-luxury-gold mb-8 block font-sans">Proprietor Details</span>
+            <div class="flex items-center gap-5 mb-6">
+              <div class="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-2xl font-serif border border-white/5 uppercase">
+                ${owner.full_name[0]}
+              </div>
+              <div>
+                <h5 class="text-2xl font-serif text-white tracking-tight">${owner.full_name}</h5>
+                <p class="text-xs text-luxury-silver uppercase tracking-widest mt-1">Verified Landlord</p>
+              </div>
+            </div>
+            <a href="tel:${owner.phone}" class="flex items-center text-sm text-slate-300 hover:text-white transition-colors gap-3 bg-white/5 p-4 rounded-xl border border-white/5">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              ${owner.phone}
+            </a>
           </div>
         ` : ''}
       </div>

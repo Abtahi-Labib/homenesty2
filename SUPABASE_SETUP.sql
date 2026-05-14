@@ -17,7 +17,7 @@ CREATE TABLE public.properties (
   location TEXT NOT NULL,
   rent INTEGER NOT NULL,
   rooms INTEGER NOT NULL,
-  category TEXT DEFAULT 'family' CHECK (category IN ('family', 'student', 'bachelor', 'job-holder')),
+  category TEXT DEFAULT 'family' CHECK (category IN ('family', 'student', 'bachelor', 'hotel', 'job-holder')),
   image_url TEXT,
   map_link TEXT,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),

@@ -1,17 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Cormorant Garamond", serif;
+  
+  --color-primary-navy: #0a1128;
+  --color-navy-light: #1c2541;
+  --color-luxury-gold: #b89130;
+  --color-luxury-silver: #94a3b8;
+  --color-luxury-accent: #1e40af;
 }
 
 @layer base {
   body {
-    @apply bg-[#fefdfb] text-zinc-900 antialiased font-sans;
+    @apply bg-[#fcfdfe] text-slate-900 antialiased font-sans transition-colors duration-500;
   }
   
   h1, h2, h3, h4 {
-    @apply font-serif;
+    @apply font-serif tracking-tight;
+  }
+
+  .luxury-gradient {
+    background: linear-gradient(135deg, var(--color-primary-navy) 0%, #1e293b 100%);
+  }
+
+  .nav-blur {
+    @apply bg-white/90 backdrop-blur-md border-b border-slate-100;
+  }
+
+  .btn-luxury {
+    @apply bg-primary-navy text-white px-8 py-3 rounded-lg text-sm font-semibold uppercase tracking-widest hover:bg-navy-light transition-all shadow-lg hover:shadow-primary-navy/20 active:scale-95;
+  }
+
+  .card-luxury {
+    @apply bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300;
   }
 }
