@@ -39,9 +39,9 @@ function renderProperty(p) {
     'bachelor': 'Professional Suite',
     'hotel': 'Vacation & Hotel'
   };
-
-  details.innerHTML = `
-    <div class="flex-1">
+ 
+   details.innerHTML = `
+     <div class="flex-1">
       <div class="aspect-[16/10] bg-slate-100 rounded-[3rem] overflow-hidden shadow-2xl relative group">
         <img src="${p.image_url || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800'}" alt="${p.title}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
         <div class="absolute top-8 left-8">
@@ -96,6 +96,14 @@ function renderProperty(p) {
              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
              Locate on Map
            </a>
+           <button id="book-btn" class="w-full mt-6 bg-[#b89130] text-white py-5 rounded-xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#a67d26] transition-all flex items-center justify-center gap-3 shadow-lg hover:shadow-luxury-gold/20">
+             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+             Request Booking
+           </button>
+           <button id="favorite-btn" class="w-full mt-4 border border-slate-200 text-slate-500 py-4 rounded-xl font-bold uppercase tracking-widest text-[9px] hover:bg-slate-50 transition-all flex items-center justify-center gap-3">
+             <svg id="fav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="transition-colors"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.505 4.046 3 5.5L12 21l7-7Z"/></svg>
+             <span id="fav-text">Curate to Portfolio</span>
+           </button>
         </div>
 
         ${owner ? `
@@ -119,6 +127,44 @@ function renderProperty(p) {
       </div>
     </div>
   `;
+
+  // Listeners
+  const bookBtn = document.getElementById('book-btn');
+  const favBtn = document.getElementById('favorite-btn');
+
+  bookBtn.onclick = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return window.location.href = '/login.html';
+
+    const { error } = await supabase.from('bookings').insert([{ 
+      property_id: p.id, 
+      user_id: user.id 
+    }]);
+
+    if (error) alert('Booking request failed.');
+    else {
+      bookBtn.innerHTML = 'Request Sent';
+      bookBtn.disabled = true;
+      bookBtn.classList.add('bg-green-600');
+    }
+  };
+
+  favBtn.onclick = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return window.location.href = '/login.html';
+
+    const pid = p.id;
+    const { error } = await supabase.from('favorites').insert([{ user_id: user.id, property_id: pid }]);
+    
+    if (error && error.code === '23505') {
+      await supabase.from('favorites').delete().match({ user_id: user.id, property_id: pid });
+      document.getElementById('fav-icon').classList.remove('text-red-500');
+      document.getElementById('fav-text').innerText = 'Curate to Portfolio';
+    } else {
+      document.getElementById('fav-icon').classList.add('text-red-500');
+      document.getElementById('fav-text').innerText = 'In Portfolio';
+    }
+  };
 }
 
 init();

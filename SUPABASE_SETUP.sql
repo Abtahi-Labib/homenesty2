@@ -72,5 +72,46 @@ ON public.properties FOR DELETE USING (
   EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
 );
 
+-- 7. Create Bookings Table
+CREATE TABLE public.bookings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  property_id UUID REFERENCES public.properties ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  booking_date TIMESTAMPTZ DEFAULT NOW(),
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled')),
+  notes TEXT
+);
+
+-- 8. Create Favorites Table (Cart)
+CREATE TABLE public.favorites (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  property_id UUID REFERENCES public.properties ON DELETE CASCADE NOT NULL,
+  UNIQUE(user_id, property_id)
+);
+
+-- Enable RLS for new tables
+ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.favorites ENABLE ROW LEVEL SECURITY;
+
+-- Bookings Policies
+CREATE POLICY "Users can view their own bookings" 
+ON public.bookings FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Property owners can view bookings for their properties" 
+ON public.bookings FOR SELECT USING (
+  EXISTS (SELECT 1 FROM public.properties WHERE id = property_id AND owner_id = auth.uid())
+);
+
+CREATE POLICY "Users can create bookings" 
+ON public.bookings FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Favorites Policies
+CREATE POLICY "Users can view their own favorites" 
+ON public.favorites FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can manage their own favorites" 
+ON public.favorites FOR ALL USING (auth.uid() = user_id);
+
 -- 6. Trigger for New User Profile (Optional but recommended)
 -- Note: Alternatively, we do this in the code (which we already implemented in Register.tsx)

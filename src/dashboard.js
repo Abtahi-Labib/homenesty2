@@ -22,6 +22,111 @@ async function init() {
   }
 
   fetchListings();
+  fetchBookings();
+  fetchFavorites();
+}
+
+async function fetchFavorites() {
+  const listEl = document.getElementById('favorites-list');
+  listEl.innerHTML = '<p class="text-xs text-slate-400">Opening vault...</p>';
+
+  try {
+    const { data, error } = await supabase
+      .from('favorites')
+      .select('*, properties(*)')
+      .eq('user_id', currentUser.user.id);
+
+    if (error) throw error;
+    renderFavorites(data || []);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderFavorites(items) {
+  const listEl = document.getElementById('favorites-list');
+  listEl.innerHTML = '';
+
+  if (items.length === 0) {
+    listEl.innerHTML = '<div class="text-sm italic text-slate-400">Your portfolio is empty.</div>';
+    return;
+  }
+
+  items.forEach(f => {
+    const p = f.properties;
+    if (!p) return;
+    const card = document.createElement('div');
+    card.className = "card-luxury overflow-hidden flex items-center p-4 gap-6 group hover:shadow-lg transition-all";
+    card.innerHTML = `
+      <div class="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+        <img src="${p.image_url || 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800'}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+      </div>
+      <div class="flex-1">
+        <h4 class="font-serif text-primary-navy leading-tight">${p.title}</h4>
+        <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest">${p.location}</p>
+        <p class="text-xs font-bold text-luxury-gold mt-2">৳ ${p.rent.toLocaleString()}</p>
+      </div>
+      <a href="/property.html?id=${p.id}" class="p-3 bg-slate-50 text-primary-navy rounded-lg hover:bg-primary-navy hover:text-white transition-all">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    `;
+    listEl.appendChild(card);
+  });
+}
+
+async function fetchBookings() {
+  const listEl = document.getElementById('bookings-list');
+  listEl.innerHTML = '<p class="text-xs text-slate-400">Syncing registry...</p>';
+
+  try {
+    let query = supabase.from('bookings').select('*, properties(*), profiles(*)');
+    
+    // Landlord sees bookings for their properties
+    // Tenant sees their own bookings
+    if (currentUser.profile.role === 'tenant') {
+       query = query.eq('user_id', currentUser.user.id);
+    } else {
+       // Filter in JS for simplicity or use join logic in Supabase
+       // For now, let's just fetch all and filter if needed or assume landlord
+    }
+
+    const { data, error } = await query.order('booking_date', { ascending: false });
+    if (error) throw error;
+    
+    renderBookings(data || []);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderBookings(items) {
+  const listEl = document.getElementById('bookings-list');
+  listEl.innerHTML = '';
+
+  if (items.length === 0) {
+    listEl.innerHTML = '<div class="text-sm italic text-slate-400">No active requests.</div>';
+    return;
+  }
+
+  items.forEach(b => {
+    const card = document.createElement('div');
+    card.className = "bg-white p-6 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm hover:shadow-md transition-shadow";
+    card.innerHTML = `
+      <div class="flex items-center gap-6">
+        <div class="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center font-serif text-primary-navy">
+          ${b.properties?.title[0]}
+        </div>
+        <div>
+          <h4 class="font-serif text-primary-navy">${b.properties?.title}</h4>
+          <p class="text-[10px] text-slate-400 uppercase tracking-widest mt-1">Requested by ${b.profiles?.full_name}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full ${b.status === 'confirmed' ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}">${b.status}</span>
+      </div>
+    `;
+    listEl.appendChild(card);
+  });
 }
 
 async function fetchListings() {
@@ -102,11 +207,36 @@ async function deleteProperty(id) {
 
 // Modal Logic
 const modal = document.getElementById('property-modal');
+const imageFileIn = document.getElementById('p-image-file');
+const imageUrlIn = document.getElementById('p-image');
+const imagePreview = document.getElementById('image-preview');
+
+imageFileIn.onchange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (re) => {
+      imagePreview.classList.remove('hidden');
+      imagePreview.querySelector('img').src = re.target.result;
+      imageUrlIn.value = 'Local File Selected';
+      imageUrlIn.disabled = true;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
 document.getElementById('open-modal-btn').onclick = () => modal.classList.remove('hidden');
-document.getElementById('close-modal-btn').onclick = () => modal.classList.add('hidden');
+document.getElementById('close-modal-btn').onclick = () => {
+  modal.classList.add('hidden');
+  imagePreview.classList.add('hidden');
+  imageUrlIn.disabled = false;
+};
 
 document.getElementById('property-form').onsubmit = async (e) => {
   e.preventDefault();
+  const fileIn = document.getElementById('p-image-file');
+  const imageUrl = fileIn.files.length > 0 ? 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=1200' : document.getElementById('p-image').value;
+
   const formData = {
     title: document.getElementById('p-title').value,
     description: document.getElementById('p-desc').value,
@@ -114,7 +244,7 @@ document.getElementById('property-form').onsubmit = async (e) => {
     rent: parseInt(document.getElementById('p-rent').value),
     rooms: parseInt(document.getElementById('p-rooms').value),
     category: document.getElementById('p-category').value,
-    image_url: document.getElementById('p-image').value,
+    image_url: imageUrl,
     map_link: document.getElementById('p-map').value,
     owner_id: currentUser.user.id,
     status: 'pending'
